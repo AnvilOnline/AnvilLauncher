@@ -23,11 +23,9 @@ namespace AnvilLauncher
         private readonly bool m_SkipUpdate = Properties.Settings.Default.SkipUpdate;
 
         private bool m_SelfUpdated;
-        private readonly ZLib m_Zlib;
 
         public FrmMain()
         {
-            m_Zlib = new ZLib();
             InitializeComponent();
         }
 
@@ -173,10 +171,7 @@ namespace AnvilLauncher
                         }
 
                         // Automatically decompress zlib files
-                        var l_DecompressedData = m_Zlib.Decompress(l_Data);
-                        File.WriteAllBytes("Decompressed.bin", l_DecompressedData);
-                        File.WriteAllBytes("Compressed.bin", l_Data);
-                        File.WriteAllBytes(s_UpdateDirectory + l_Entry.Path, m_Zlib.Decompress(l_Data));
+                        File.WriteAllBytes(l_Path, ZLib.Decompress(l_Data));
                     }
                 }
                 catch (Exception s_Exception)

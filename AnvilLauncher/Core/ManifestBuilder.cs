@@ -56,15 +56,17 @@ namespace AnvilLauncher.Core
 
             foreach (var l_Entry in s_Manifest.Entries)
             {
-                // TODO: ZLib Compress the shit out of this.
-                var l_FilePath = p_PackageDirectory + l_Entry.Path;
+                var l_FilePath = Path.GetFullPath(p_PackageDirectory + l_Entry.Path);
                 if (!File.Exists(l_FilePath))
                     continue;
 
                 File.WriteAllBytes(l_FilePath, ZLib.Compress(l_FilePath));
             }
 
-            File.WriteAllText("manifest.json", s_Manifest.Serialize());
+            var s_ManifestPath = Path.Combine(p_PackageDirectory, "manifest.json");
+
+            File.WriteAllText(s_ManifestPath, s_Manifest.Serialize());
+
             return true;
         }
     }
