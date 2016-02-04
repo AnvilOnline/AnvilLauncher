@@ -45,7 +45,9 @@ namespace AnvilLauncher
             var s_Launcher = new ProcessLauncher();
 
             // Set our new path up so we can load dll's from a different location
-            var s_Ret = s_Launcher.SetDllSearchLocation(m_BinDir);
+            var s_BinDir = Path.GetFullPath(m_BinDir);
+
+            var s_Ret = s_Launcher.SetDllSearchLocation(s_BinDir);
             if (!s_Ret)
             {
                 UpdateStatus(0, "Could not add bin folder to search path.");
@@ -63,7 +65,7 @@ namespace AnvilLauncher
             }
 
             // Create the suspended process, which will give us ample time to inject (hue hue hue, it will never execute unless we tell it too)
-            var s_LaunchSuccess = s_Launcher.CreateSuspendedProcess(m_ProcessLocation, s_CommandLine, m_BinDir);
+            var s_LaunchSuccess = s_Launcher.CreateSuspendedProcess(m_ProcessLocation, s_CommandLine, s_BinDir);
 
             // Ensure that the launch was a success
             if (!s_LaunchSuccess)
@@ -81,7 +83,7 @@ namespace AnvilLauncher
 #endif
 
             // Inject our dll
-            var s_Final = Path.GetFullPath(Path.Combine(m_BinDir, m_ModuleName));
+            var s_Final = Path.GetFullPath(Path.Combine(s_BinDir, m_ModuleName));
             WriteLog($"Injecting module: {s_Final}.");
             if (!s_Launcher.InjectDll(s_ProcessId, s_Final))
             {
@@ -210,7 +212,7 @@ namespace AnvilLauncher
             // Exit this copy of the updater
             Application.Exit();
 
-            return true;
+            return false;
         }
 
         /// <summary>

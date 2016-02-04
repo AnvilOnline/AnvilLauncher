@@ -167,6 +167,7 @@ namespace AnvilLauncher.Core
             }
 
             var s_StartupInfo = new Startupinfo();
+            
             ProcessInformation s_ProcessInfo;
             var s_Success = CreateProcess(null, p_FilePath + " " + p_Arguments, IntPtr.Zero, IntPtr.Zero, false,
                 ProcessCreationFlags.CreateSuspended, IntPtr.Zero, null, ref s_StartupInfo, out s_ProcessInfo);
