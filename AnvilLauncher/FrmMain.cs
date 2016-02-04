@@ -23,9 +23,11 @@ namespace AnvilLauncher
         private readonly bool m_SkipUpdate = Properties.Settings.Default.SkipUpdate;
 
         private bool m_SelfUpdated;
+        private readonly ZLib m_Zlib;
 
         public FrmMain()
         {
+            m_Zlib = new ZLib();
             InitializeComponent();
         }
 
@@ -130,7 +132,7 @@ namespace AnvilLauncher
             var s_EntriesToDownload = await CompareManifest(s_Manifest);
 
             // UI tracking
-            var s_current = 0.0f;
+            var s_Current = 0.0f;
             var s_Length = (float)s_EntriesToDownload.Length;
 
             // Hold our current running executable
@@ -139,9 +141,9 @@ namespace AnvilLauncher
             // Loop through and download every entry
             foreach (var l_Entry in s_EntriesToDownload)
             {
-                s_current++;
+                s_Current++;
 
-                UpdateStatus((int)(100 * (s_current / s_Length)), "Downloading " + l_Entry.Path + ".");
+                UpdateStatus((int)(100 * (s_Current / s_Length)), "Downloading " + l_Entry.Path + ".");
 
                 var l_DownloadPath = s_Manifest.BaseUrl + l_Entry.Path;
 
@@ -151,7 +153,7 @@ namespace AnvilLauncher
                     {
                         var l_Data = await l_Client.GetByteArrayAsync(new Uri(l_DownloadPath));
 
-                        var l_Path = Path.Combine(s_UpdateDirectory, l_Entry.Path);
+                        var l_Path = Path.GetFullPath(s_UpdateDirectory + l_Entry.Path);
 
                         var l_DirectoryPath = Path.GetDirectoryName(l_Path);
                         if (l_DirectoryPath != null && !Directory.Exists(l_DirectoryPath))
@@ -171,7 +173,10 @@ namespace AnvilLauncher
                         }
 
                         // Automatically decompress zlib files
-                        File.WriteAllBytes(s_UpdateDirectory + l_Entry.Path, ZLib.Decompress(l_Data));
+                        var l_DecompressedData = m_Zlib.Decompress(l_Data);
+                        File.WriteAllBytes("Decompressed.bin", l_DecompressedData);
+                        File.WriteAllBytes("Compressed.bin", l_Data);
+                        File.WriteAllBytes(s_UpdateDirectory + l_Entry.Path, m_Zlib.Decompress(l_Data));
                     }
                 }
                 catch (Exception s_Exception)
@@ -271,7 +276,7 @@ namespace AnvilLauncher
 
 
                 // If the file does not exist, set to download it
-                var l_Path = Path.Combine(m_CurrentDir, l_Entry.Path);
+                var l_Path = Path.GetFullPath(m_CurrentDir + l_Entry.Path);
                 if (!File.Exists(l_Path))
                 {
                     s_EntryList.Add(l_Entry);

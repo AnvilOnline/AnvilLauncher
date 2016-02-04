@@ -25,7 +25,7 @@ namespace AnvilLauncher.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("http://anvilonline.net/manifest.json")]
+        [global::System.Configuration.DefaultSettingValueAttribute("http://anvilonline.net/updates/build_v1_0/manifest.json")]
         public string ManifestUrl {
             get {
                 return ((string)(this["ManifestUrl"]));
@@ -49,7 +49,7 @@ namespace AnvilLauncher.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        [global::System.Configuration.DefaultSettingValueAttribute(".\\ui")]
         public string UiDirectory {
             get {
                 return ((string)(this["UiDirectory"]));
@@ -85,7 +85,7 @@ namespace AnvilLauncher.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("anvil.dll")]
+        [global::System.Configuration.DefaultSettingValueAttribute("AnvilClient.dll")]
         public string ModuleName {
             get {
                 return ((string)(this["ModuleName"]));
