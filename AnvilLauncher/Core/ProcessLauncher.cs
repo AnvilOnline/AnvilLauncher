@@ -1,6 +1,8 @@
 ﻿using System;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Windows.Forms;
 
 namespace AnvilLauncher.Core
 {
@@ -163,6 +165,8 @@ namespace AnvilLauncher.Core
             if (!string.IsNullOrWhiteSpace(p_BinDirectory))
             {
                 var s_Path = Environment.GetEnvironmentVariable("PATH") + $";{p_BinDirectory}";
+                MessageBox.Show($"Path: {s_Path}");
+
                 Environment.SetEnvironmentVariable("PATH", s_Path);
             }
 
@@ -170,7 +174,7 @@ namespace AnvilLauncher.Core
             
             ProcessInformation s_ProcessInfo;
             var s_Success = CreateProcess(null, p_FilePath + " " + p_Arguments, IntPtr.Zero, IntPtr.Zero, false,
-                ProcessCreationFlags.CreateSuspended, IntPtr.Zero, null, ref s_StartupInfo, out s_ProcessInfo);
+                ProcessCreationFlags.CreateSuspended, IntPtr.Zero, Path.GetDirectoryName(p_FilePath), ref s_StartupInfo, out s_ProcessInfo);
 
             if (!s_Success)
                 return false;
@@ -180,9 +184,9 @@ namespace AnvilLauncher.Core
             return true;
         }
 
-        public bool InjectDll(uint p_processId, string p_dllPath)
+        public bool InjectDll(uint p_ProcessId, string p_DllPath)
         {
-            var s_Handle = OpenProcess(ProcessAccessFlags.All, false, p_processId);
+            var s_Handle = OpenProcess(ProcessAccessFlags.All, false, p_ProcessId);
             if (s_Handle == IntPtr.Zero)
                 return false;
 
@@ -190,14 +194,14 @@ namespace AnvilLauncher.Core
             if (s_Address == IntPtr.Zero)
                 return false;
 
-            var s_Arg = VirtualAllocEx(s_Handle, IntPtr.Zero, (uint)p_dllPath.Length,
+            var s_Arg = VirtualAllocEx(s_Handle, IntPtr.Zero, (uint)p_DllPath.Length,
                 AllocationType.Reserve | AllocationType.Commit, MemoryProtection.ReadWrite);
 
             if (s_Arg == IntPtr.Zero)
                 return false;
 
             IntPtr s_Written;
-            var s_WriteSuccess = WriteProcessMemory(s_Handle, s_Arg, Encoding.Default.GetBytes(p_dllPath), p_dllPath.Length,
+            var s_WriteSuccess = WriteProcessMemory(s_Handle, s_Arg, Encoding.Default.GetBytes(p_DllPath), p_DllPath.Length,
                 out s_Written);
             if (!s_WriteSuccess)
                 return false;
