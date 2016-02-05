@@ -165,7 +165,7 @@ namespace AnvilLauncher.Core
             if (!string.IsNullOrWhiteSpace(p_BinDirectory))
             {
                 var s_Path = Environment.GetEnvironmentVariable("PATH") + $";{p_BinDirectory}";
-                MessageBox.Show($"Path: {s_Path}");
+                //MessageBox.Show($"Path: {s_Path}");
 
                 Environment.SetEnvironmentVariable("PATH", s_Path);
             }
