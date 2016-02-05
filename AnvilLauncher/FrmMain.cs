@@ -98,7 +98,7 @@ namespace AnvilLauncher
             Thread.Sleep(500);
 
             // Resume the suspended process, that way all hook code should already be injected at this time.
-            s_Launcher.ResumeProcess(s_ProcessThread);
+            //s_Launcher.ResumeProcess(s_ProcessThread);
 
             // Sob quietly before leaving.
             Application.Exit();
