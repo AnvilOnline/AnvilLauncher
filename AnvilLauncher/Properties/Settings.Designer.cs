@@ -25,7 +25,7 @@ namespace AnvilLauncher.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("http://anvilonline.net/updates/build_v1_0/manifest.json")]
+        [global::System.Configuration.DefaultSettingValueAttribute("http://anvilonline.net/updates/development/manifest.json")]
         public string ManifestUrl {
             get {
                 return ((string)(this["ManifestUrl"]));
@@ -104,6 +104,18 @@ namespace AnvilLauncher.Properties {
             }
             set {
                 this["SkipUpdate"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool SkipUI {
+            get {
+                return ((bool)(this["SkipUI"]));
+            }
+            set {
+                this["SkipUI"] = value;
             }
         }
     }

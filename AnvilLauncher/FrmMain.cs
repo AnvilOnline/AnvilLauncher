@@ -21,6 +21,7 @@ namespace AnvilLauncher
         private readonly string m_ProcessLocation = Path.GetFullPath(Properties.Settings.Default.ExecutableLocation);
         private readonly string m_DefaultArgs = Properties.Settings.Default.DefaultArgs;
         private readonly bool m_SkipUpdate = Properties.Settings.Default.SkipUpdate;
+        private readonly bool m_SkipUI = Properties.Settings.Default.SkipUI;
 
         private bool m_SelfUpdated;
 
@@ -271,6 +272,9 @@ namespace AnvilLauncher
                 // Update the status
                 UpdateStatus((int)(100 * (s_Current / s_Count)), $"Verifying {l_Entry.Path}");
 
+                var s_Directory = Path.GetDirectoryName(l_Entry.Path);
+                if (string.Compare(s_Directory, "ui", StringComparison.CurrentCultureIgnoreCase) == 0 && m_SkipUI)
+                    continue;
 
                 // If the file does not exist, set to download it
                 var l_Path = Path.GetFullPath(m_CurrentDir + l_Entry.Path);
