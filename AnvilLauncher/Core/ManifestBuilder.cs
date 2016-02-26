@@ -33,14 +33,22 @@ namespace AnvilLauncher.Core
             foreach (var l_File in s_Files)
             {
                 var l_FileInfo = new FileInfo(l_File);
-                var l_Hash = await Task.Run(() => BitConverter.ToString(new SHA1CryptoServiceProvider().ComputeHash(File.ReadAllBytes(l_File))).Replace("-", ""));
 
-                var l_Entry = new AnvilManifest.ManifestEntry
+                string l_Hash;
+
+                using (var l_FileReader = new BinaryReader(new FileStream(l_File, FileMode.Open, FileAccess.Read)))
                 {
-                    Hash = l_Hash,
-                    Path = l_File.Replace(m_BaseDirectory, ""),
-                    Size = l_FileInfo.Length
-                };
+                    var l_Data = l_FileReader.ReadBytes((int)l_FileReader.BaseStream.Length);
+                    var l_ShaHash = new SHA1CryptoServiceProvider().ComputeHash(l_Data);
+                    l_Hash = BitConverter.ToString(l_ShaHash).Replace("-", "");
+                }
+                    
+                var l_Entry = new AnvilManifest.ManifestEntry
+                    {
+                        Hash = l_Hash,
+                        Path = l_File.Replace(m_BaseDirectory, ""),
+                        Size = l_FileInfo.Length
+                    };
 
                 s_ManifestEntries.Add(l_Entry);
             }
@@ -50,17 +58,27 @@ namespace AnvilLauncher.Core
             return s_Manifest;
         }
 
-        public async Task<bool> GenerateUpdate(string p_PackageDirectory, uint p_Build, string p_Commit = "", string p_BaseUrl = "")
+        public async Task<bool> GenerateUpdate(string p_InputDirectory, string p_PackageDirectory, uint p_Build, string p_Commit = "", string p_BaseUrl = "")
         {
             var s_Manifest = await GenerateManifest(p_Build, p_Commit, p_BaseUrl);
 
             foreach (var l_Entry in s_Manifest.Entries)
             {
-                var l_FilePath = Path.GetFullPath(p_PackageDirectory + l_Entry.Path);
+                var l_FilePath = Path.GetFullPath(p_InputDirectory + l_Entry.Path);
+                var l_OutPath = Path.GetFullPath(p_PackageDirectory + l_Entry.Path);
+                var l_OutDirectory = Path.GetDirectoryName(l_OutPath);
+                if (l_OutDirectory == null)
+                    continue;
+
+                if (!Directory.Exists(l_OutDirectory))
+                    Directory.CreateDirectory(l_OutDirectory);
+
                 if (!File.Exists(l_FilePath))
                     continue;
 
-                File.WriteAllBytes(l_FilePath, ZLib.Compress(l_FilePath));
+                Console.WriteLine($"Compressing {l_Entry.Path}.");
+
+                File.WriteAllBytes(l_OutPath, ZLib.Compress(l_FilePath));
             }
 
             var s_ManifestPath = Path.Combine(p_PackageDirectory, "manifest.json");

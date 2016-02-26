@@ -7,7 +7,10 @@ namespace AnvilLauncher.Core
     {
         public static byte[] Decompress(string p_File)
         {
-            return Decompress(File.ReadAllBytes(p_File));
+            byte[] s_Data;
+            using (var l_FileReader = new BinaryReader(new FileStream(p_File, FileMode.Open, FileAccess.Read)))
+                s_Data = l_FileReader.ReadBytes((int)l_FileReader.BaseStream.Length);
+            return Decompress(s_Data);
         }
 
         /// <summary>
@@ -40,7 +43,10 @@ namespace AnvilLauncher.Core
 
         public static byte[] Compress(string p_File)
         {
-            return Compress(File.ReadAllBytes(p_File));
+            byte[] s_Data;
+            using (var l_FileReader = new BinaryReader(new FileStream(p_File, FileMode.Open, FileAccess.Read)))
+                s_Data = l_FileReader.ReadBytes((int)l_FileReader.BaseStream.Length);
+            return Compress(s_Data);
         }
         /// <summary>
         /// Compress uncompressed data
