@@ -20,6 +20,11 @@ namespace AnvilLauncher.Core
             public string Hash { get; set; }
             [DataMember]
             public long Size { get; set; }
+
+            public override string ToString()
+            {
+                return Path;
+            }
         }
 
         [DataMember]
