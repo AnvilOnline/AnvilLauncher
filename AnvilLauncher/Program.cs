@@ -1,4 +1,7 @@
 ﻿using System;
+using System.IO;
+using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using AnvilLauncher.Core;
@@ -30,6 +33,28 @@ namespace AnvilLauncher
 
                     Task.WaitAll(s_UpdateTask);
                     return;
+                }
+            }
+
+            if (p_Arguments.Count(p_Arg => p_Arg == "-cleanup") > 0)
+            {
+                var s_Path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+
+                if (s_Path != null)
+                {
+                    var s_Information = Directory.GetFiles(s_Path, "*.old", SearchOption.AllDirectories);
+                    foreach (var l_Info in s_Information)
+                    {
+                        try
+                        {
+                            File.Delete(l_Info);
+                        }
+                        catch
+                        {
+                            // ignored
+                        }
+                    }
+
                 }
             }
 

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Reflection;
 using System.Security.Cryptography;
@@ -160,18 +161,18 @@ namespace AnvilLauncher
                         if (l_DirectoryPath != null && !Directory.Exists(l_DirectoryPath))
                             Directory.CreateDirectory(l_DirectoryPath);
 
+                        // See if there are .old files exist, if they do delete them so we can create our new "old" files that will be the currenly running app.
+                        var s_OldFilePath = l_Path + ".old";
+                        if (File.Exists(s_OldFilePath))
+                            File.Delete(s_OldFilePath);
+
+                        // If the file exists, move it to .old this is able to be done on in-use files.
+                        if (File.Exists(l_Path))
+                            File.Move(l_Path, s_OldFilePath);
+
                         // Handle updating the updater.
                         if (Path.GetFileName(l_Entry.Path) == s_UpdateExecutablePath)
-                        {
-                            // If a previous old updater already exists, delete it
-                            var l_OldUpdaterPath = s_UpdateExecutablePath + ".old";
-                            if (File.Exists(l_OldUpdaterPath))
-                                File.Delete(l_OldUpdaterPath);
-
-                            // Rename the currently running executable.
-                            File.Move(s_UpdateExecutablePath, l_OldUpdaterPath);
                             m_SelfUpdated = true;
-                        }
 
                         // Automatically decompress zlib files
                         File.WriteAllBytes(l_Path, ZLib.Decompress(l_Data));
@@ -186,23 +187,33 @@ namespace AnvilLauncher
 
             // Create a post-update manifest to see if there were any files that didn't process correctly
             var s_PostManifest = await CompareManifest(s_Manifest);
-            if (s_PostManifest.Length > 0)
+
+            // If we are not updating the updater, and all of the files match the manifest we return happily
+            if (!m_SelfUpdated && s_PostManifest.Length == 0)
+                return true;
+
+            var s_ExecutableCount =
+                s_PostManifest.Select(p_Entry => p_Entry.Path.Contains(".exe") || p_Entry.Path.Contains(".dll"))
+                    .ToList()
+                    .Count;
+
+            if (s_PostManifest.Length != s_ExecutableCount)
             {
-                UpdateStatus(0, "Error extracting some files, restart updater, or seek help");
+                UpdateStatus(0,
+                    "Error extracting some files, there were some non-application updates that not get updated.");
                 return false;
             }
 
-            if (!m_SelfUpdated)
-                return true;
-
             // Get the command line arguments and forward them.
-            var s_CommandLineArgs = Environment.GetCommandLineArgs();
+            var s_CommandLineArgs = Environment.GetCommandLineArgs().ToList();
             var s_CommandLine = "";
 
             // Append all of the arguments to one long string
-            if (s_CommandLineArgs.Length > 0)
+            if (s_CommandLineArgs.Count > 0)
             {
-                for (var i = 1; i < s_CommandLineArgs.Length; ++i)
+                s_CommandLineArgs.Add("-cleanup");
+
+                for (var i = 1; i < s_CommandLineArgs.Count; ++i)
                     s_CommandLine += s_CommandLineArgs[i] + " ";
             }
 
