@@ -1,0 +1,30 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="AnvilLauncher.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="ManifestUrl" Type="System.String" Scope="User">
+      <Value Profile="(Default)">http://anvilonline.net/updates/development/manifest.json</Value>
+    </Setting>
+    <Setting Name="BinDirectory" Type="System.String" Scope="User">
+      <Value Profile="(Default)">.\bin</Value>
+    </Setting>
+    <Setting Name="UiDirectory" Type="System.String" Scope="User">
+      <Value Profile="(Default)">.\ui</Value>
+    </Setting>
+    <Setting Name="ExecutableLocation" Type="System.String" Scope="User">
+      <Value Profile="(Default)">.\halo_online.exe</Value>
+    </Setting>
+    <Setting Name="DefaultArgs" Type="System.String" Scope="User">
+      <Value Profile="(Default)">--account 123 --sign-in-code 123 -width 1280 -height 720 -window</Value>
+    </Setting>
+    <Setting Name="ModuleName" Type="System.String" Scope="User">
+      <Value Profile="(Default)">AnvilClient.dll</Value>
+    </Setting>
+    <Setting Name="SkipUpdate" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="SkipUI" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>
