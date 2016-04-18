@@ -336,7 +336,7 @@ namespace AnvilLauncher
 
         private void WriteLog(string p_Message)
         {
-            using (var l_Log = File.AppendText("availlauncher.log"))
+            using (var l_Log = File.AppendText("anvillauncher.log"))
                 l_Log.WriteLine(p_Message);
         }
     }
