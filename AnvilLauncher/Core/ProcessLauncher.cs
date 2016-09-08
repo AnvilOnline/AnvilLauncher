@@ -119,47 +119,10 @@ namespace AnvilLauncher.Core
 
         [DllImport("kernel32.dll")]
         public static extern uint ResumeThread(IntPtr p_HThread);
-
-        [DllImport("kernel32.dll")]
-        public static extern uint SuspendThread(IntPtr p_HThread);
-
-        [DllImport("kernel32.dll")]
-        public static extern IntPtr OpenProcess(
-             ProcessAccessFlags p_ProcessAccess,
-             bool p_BInheritHandle,
-             uint p_ProcessId
-        );
-
-        [DllImport("kernel32", CharSet = CharSet.Ansi, ExactSpelling = true, SetLastError = true)]
-        static extern IntPtr GetProcAddress(IntPtr p_HModule, string p_ProcName);
-
-        [DllImport("kernel32.dll", SetLastError = true, ExactSpelling = true)]
-        static extern IntPtr VirtualAllocEx(IntPtr p_HProcess, IntPtr p_LpAddress,
-           uint p_DwSize, AllocationType p_FlAllocationType, MemoryProtection p_FlProtect);
-
-        [DllImport("kernel32.dll", SetLastError = true)]
-        static extern bool WriteProcessMemory(
-            IntPtr p_HProcess,
-            IntPtr p_LpBaseAddress,
-            byte[] p_LpBuffer,
-            int p_NSize,
-            out IntPtr p_LpNumberOfBytesWritten);
-
-        [DllImport("kernel32.dll")]
-        static extern IntPtr CreateRemoteThread(IntPtr p_HProcess,
-           IntPtr p_LpThreadAttributes, uint p_DwStackSize, IntPtr
-           p_LpStartAddress, IntPtr p_LpParameter, uint p_DwCreationFlags, IntPtr p_LpThreadId);
-
-        [DllImport("kernel32.dll", CharSet = CharSet.Auto)]
-        public static extern IntPtr GetModuleHandle(string p_LpModuleName);
-
+        
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         static extern bool SetDllDirectory(string p_LpPathName);
-
-        // UWP Launching
-        [DllImport("ole32.dll", EntryPoint = "CoCreateInstance", CallingConvention = CallingConvention.StdCall)]
-        static extern UInt32 CoCreateInstance([In, MarshalAs(UnmanagedType.LPStruct)] Guid p_Rclsid, IntPtr p_PUnkOuter, UInt32 p_DwClsContext, [In, MarshalAs(UnmanagedType.LPStruct)] Guid p_Riid, out IntPtr p_Ppv);
 
         public uint SpawnedProcessId { get; private set; }
         public IntPtr SpawnedThread { get; private set; }
@@ -186,32 +149,6 @@ namespace AnvilLauncher.Core
             SpawnedProcessId = s_ProcessInfo.DwProcessId;
             SpawnedThread = s_ProcessInfo.HThread;
             return true;
-        }
-
-        public bool InjectDll(uint p_ProcessId, string p_DllPath)
-        {
-            var s_Handle = OpenProcess(ProcessAccessFlags.All, false, p_ProcessId);
-            if (s_Handle == IntPtr.Zero)
-                return false;
-
-            var s_Address = GetProcAddress(GetModuleHandle("kernel32.dll"), "LoadLibraryA");
-            if (s_Address == IntPtr.Zero)
-                return false;
-
-            var s_Arg = VirtualAllocEx(s_Handle, IntPtr.Zero, (uint)p_DllPath.Length,
-                AllocationType.Reserve | AllocationType.Commit, MemoryProtection.ReadWrite);
-
-            if (s_Arg == IntPtr.Zero)
-                return false;
-
-            IntPtr s_Written;
-            var s_WriteSuccess = WriteProcessMemory(s_Handle, s_Arg, Encoding.Default.GetBytes(p_DllPath), p_DllPath.Length,
-                out s_Written);
-            if (!s_WriteSuccess)
-                return false;
-
-            var s_ThreadId = CreateRemoteThread(s_Handle, IntPtr.Zero, 0, s_Address, s_Arg, 0, IntPtr.Zero);
-            return s_ThreadId != IntPtr.Zero;
         }
 
         public bool ResumeProcess(IntPtr p_Thread)

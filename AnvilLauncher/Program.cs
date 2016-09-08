@@ -16,7 +16,12 @@ namespace AnvilLauncher
         [STAThread]
         static void Main(string[] p_Arguments)
         {
-            new UniversalProcessLauncher().LaunchHalo();
+            var s_BinDir = Path.GetFullPath(Properties.Settings.Default.BinDirectory);
+            var s_ModuleName = Properties.Settings.Default.ModuleName;
+
+            var s_FinalInjectionPath = Path.GetFullPath(Path.Combine(s_BinDir, s_ModuleName));
+
+            new UniversalProcessLauncher().LaunchHalo(s_FinalInjectionPath);
 
             //if (p_Arguments.Length >= 6)
             //{

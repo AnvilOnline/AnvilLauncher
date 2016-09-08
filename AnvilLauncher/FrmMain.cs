@@ -87,7 +87,7 @@ namespace AnvilLauncher
             // Inject our dll
             var s_Final = Path.GetFullPath(Path.Combine(s_BinDir, m_ModuleName));
             WriteLog($"Injecting module: {s_Final}.");
-            if (!s_Launcher.InjectDll(s_ProcessId, s_Final))
+            if (!new Injector().InjectDll(s_ProcessId, s_Final))
             {
                 WriteLog("Failed injection");
                 UpdateStatus(0, "Could not load module.");

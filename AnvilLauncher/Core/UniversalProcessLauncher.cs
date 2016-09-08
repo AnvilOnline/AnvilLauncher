@@ -3,11 +3,10 @@ using Windows.Management.Deployment;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Security.Principal;
-using Windows.ApplicationModel;
 using Microsoft.Win32;
 
 namespace AnvilLauncher.Core
@@ -114,16 +113,19 @@ namespace AnvilLauncher.Core
             return true;
         }
 
-        private bool LaunchProcess(UniversalPackage p_Package, bool p_Suspended)
+        private bool LaunchProcess(UniversalPackage p_Package, out uint p_ProcessId, bool p_Suspend = false)
         {
-            var s_ActivationManager = new ApplicationActivationManager();//Class not registered
+            // Initialize our output process id to 0
+            p_ProcessId = 0;
 
-            uint s_ProcessId = 0;
+            // Create a new instance of ApplicationActivationManager
+            var s_ActivationManager = new ApplicationActivationManager();//Class not registered
 
             var s_AppUserModelId = GetAppUserModelId(p_Package);
 
-            var s_Result = s_ActivationManager.ActivateApplication(s_AppUserModelId, null, ActivateOptions.None, out s_ProcessId);
-            if (s_Result != IntPtr.Zero || s_ProcessId == 0)
+            // Try to activate our application
+            var s_Result = s_ActivationManager.ActivateApplication(s_AppUserModelId, null, ActivateOptions.None, out p_ProcessId);
+            if (s_Result != IntPtr.Zero || p_ProcessId == 0)
             {
 #if DEBUG
                 Console.WriteLine($"Could not launch {p_Package.Name}.");
@@ -131,19 +133,17 @@ namespace AnvilLauncher.Core
                 return false;
             }
 
-//            if (p_Suspended && !SuspendProcess((int)s_ProcessId))
-//            {
-//#if DEBUG
-//                Console.WriteLine($"Could not suspend process {s_ProcessId}.");
-//                return false;
-//#endif
-//            }
-
-            var s_InjectResult = new Injector().InjectDll(s_ProcessId, @"P:\Games\PC\Halo Online\Anvil\AnvilClient\x64\Debug\AnvilClient.dll");
+            // If we are set to suspend our process, do so now
+            if (p_Suspend && !SuspendProcess((int)p_ProcessId))
+            {
+#if DEBUG
+                Console.WriteLine($"Could not suspend process {p_ProcessId}.");
+#endif
+                return false;
+            }
 
             return true;
         }
-
 
         // xbox7887 modified by kiwidog
         private static string GetAppUserModelId(UniversalPackage p_Package)
@@ -175,16 +175,25 @@ namespace AnvilLauncher.Core
             return s_AppUserModelId;
         }
 
-        public bool LaunchHalo()
+        public bool LaunchHalo(string p_InjectDll = "")
         {
             UniversalPackage s_HaloPackage;
             if (!FindHalo(out s_HaloPackage))
                 return false;
 
-            if (!LaunchProcess(s_HaloPackage, true))
+            uint s_ProcessId = 0;
+            if (!LaunchProcess(s_HaloPackage, out s_ProcessId))
                 return false;
 
-            return true;
+            if (string.IsNullOrWhiteSpace(p_InjectDll))
+                return true;
+            
+            var s_Injector = new Injector();
+
+            if (!s_Injector.SetPermissions(p_InjectDll))
+                return false;
+
+            return s_Injector.InjectDll(s_ProcessId, p_InjectDll);
         }
 
         private bool SuspendProcess(int p_ProcessId)

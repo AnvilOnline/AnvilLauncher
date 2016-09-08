@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Security.AccessControl;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -111,6 +113,21 @@ namespace AnvilLauncher.Core
 
             var s_ThreadId = CreateRemoteThread(s_Handle, IntPtr.Zero, 0, s_Address, s_Arg, 0, IntPtr.Zero);
             return s_ThreadId != IntPtr.Zero;
+        }
+
+        public bool SetPermissions(string p_DllPath)
+        {
+            if (string.IsNullOrWhiteSpace(p_DllPath))
+                return false;
+
+            if (!File.Exists(p_DllPath))
+                return false;
+
+            var s_Security = File.GetAccessControl(p_DllPath);
+            s_Security.AddAccessRule(new FileSystemAccessRule("ALL APPLICATION PACKAGES", FileSystemRights.ReadAndExecute, AccessControlType.Allow));
+            File.SetAccessControl(p_DllPath, s_Security);
+
+            return true;
         }
     }
 }
