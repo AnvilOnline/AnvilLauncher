@@ -157,6 +157,10 @@ namespace AnvilLauncher.Core
         [return: MarshalAs(UnmanagedType.Bool)]
         static extern bool SetDllDirectory(string p_LpPathName);
 
+        // UWP Launching
+        [DllImport("ole32.dll", EntryPoint = "CoCreateInstance", CallingConvention = CallingConvention.StdCall)]
+        static extern UInt32 CoCreateInstance([In, MarshalAs(UnmanagedType.LPStruct)] Guid p_Rclsid, IntPtr p_PUnkOuter, UInt32 p_DwClsContext, [In, MarshalAs(UnmanagedType.LPStruct)] Guid p_Riid, out IntPtr p_Ppv);
+
         public uint SpawnedProcessId { get; private set; }
         public IntPtr SpawnedThread { get; private set; }
 
